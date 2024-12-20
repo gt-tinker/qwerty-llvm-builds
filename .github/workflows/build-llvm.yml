@@ -1,0 +1,102 @@
+name: Build LLVM
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+jobs:
+  manylinux_x86:
+    runs-on: [self-hosted, Linux, X64]
+
+    steps:
+    - name: Clone Qwerty repo
+      uses: actions/checkout@v4
+      with:
+        repository: gt-tinker/qwerty
+        ref: main
+    - name: Build LLVM
+      working-directory: ci/build-manylinux
+      run: |
+        export LLVM_VERSION=${GITHUB_REF#refs/tags/v}
+        if [[ ! ( $LLVM_VERSION =~ [[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+ ) ]]; then
+          printf '$GITHUB_REF is not an LLVM version: %s\n' "$GITHUB_REF" >&2
+          exit 1
+        fi
+
+        sbatch slurm-build-manylinux-llvm.sh
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        # If the glob below doesn't match anything, don't silently fail
+        fail_on_unmatched_files: true
+        files: |
+          ci/build-manylinux/io/*.tar.xz
+
+  macos_aarch64:
+    runs-on: [self-hosted, macOS, ARM64]
+
+    steps:
+    - name: Clone Qwerty repo
+      uses: actions/checkout@v4
+      with:
+        repository: gt-tinker/qwerty
+        ref: main
+    - name: Build LLVM
+      working-directory: ci
+      run: |
+        export LLVM_VERSION=${GITHUB_REF#refs/tags/v}
+        if [[ ! ( $LLVM_VERSION =~ [[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+ ) ]]; then
+          printf '$GITHUB_REF is not an LLVM version: %s\n' "$GITHUB_REF" >&2
+          exit 1
+        fi
+
+        rm -vf /Users/aadams80/Documents/llvm/llvm_*.tar.xz
+        ./build-llvm.sh "$LLVM_VERSION" /Users/aadams80/Documents/llvm
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        # If the glob below doesn't match anything, don't silently fail
+        fail_on_unmatched_files: true
+        files: |
+          /Users/aadams80/Documents/llvm/llvm_*.tar.xz
+
+  windows_x86:
+    runs-on: codebuild-qwerty-llvm-build-windows-${{ github.run_id }}-${{ github.run_attempt }}
+
+    steps:
+    - name: Clone Qwerty repo
+      uses: actions/checkout@v4
+      with:
+        repository: gt-tinker/qwerty
+        ref: main
+    - name: Build LLVM
+      working-directory: ci/build-windows
+      run: |
+        if ($Env:GITHUB_REF.StartsWith('refs/tags/v')) {
+            $llvm_version = $Env:GITHUB_REF.Substring('refs/tags/v'.Length)
+        } else {
+            $llvm_version = $Env:GITHUB_REF
+        }
+
+        if (-not ($llvm_version -match '\d+\.\d+\.\d+')) {
+            Write-Error "`$GITHUB_REF is not an LLVM version: $Env:GITHUB_REF"
+            exit 1
+        }
+
+        if (Test-Path 'C:\qwerty\build-zipped-up\llvm') {
+            rm -r 'C:\qwerty\build-zipped-up\llvm'
+        }
+        .\build-llvm.ps1 -version $llvm_version
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        # If the glob below doesn't match anything, don't silently fail
+        fail_on_unmatched_files: true
+        # Glob package used by softprops/action-gh-release says:
+        # "Please only use forward-slashes in glob expressions."
+        # https://www.npmjs.com/package/glob#windows
+        files: |
+          C:/qwerty/build-zipped-up/llvm/llvm_*.zip
