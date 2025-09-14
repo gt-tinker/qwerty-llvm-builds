@@ -15,7 +15,7 @@ jobs:
         repository: gt-tinker/qwerty
         ref: main
     - name: Build LLVM
-      working-directory: ci/build-manylinux
+      working-directory: dev/ci/build-manylinux
       run: |
         export LLVM_VERSION=${GITHUB_REF#refs/tags/v}
         if [[ ! ( $LLVM_VERSION =~ [[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+ ) ]]; then
@@ -31,7 +31,7 @@ jobs:
         # If the glob below doesn't match anything, don't silently fail
         fail_on_unmatched_files: true
         files: |
-          ci/build-manylinux/io/*.tar.xz
+          dev/ci/build-manylinux/io/*.tar.xz
 
   macos_aarch64:
     runs-on: [self-hosted, macOS, ARM64]
@@ -43,7 +43,7 @@ jobs:
         repository: gt-tinker/qwerty
         ref: main
     - name: Build LLVM
-      working-directory: ci
+      working-directory: dev/ci
       run: |
         export LLVM_VERSION=${GITHUB_REF#refs/tags/v}
         if [[ ! ( $LLVM_VERSION =~ [[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+ ) ]]; then
@@ -63,7 +63,7 @@ jobs:
           /Users/aadams80/Documents/llvm/llvm_*.tar.xz
 
   windows_x86:
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
     - name: Clone Qwerty repo
@@ -72,7 +72,7 @@ jobs:
         repository: gt-tinker/qwerty
         ref: main
     - name: Build LLVM
-      working-directory: ci/build-windows
+      working-directory: dev/ci/build-windows
       run: |
         if ($Env:GITHUB_REF.StartsWith('refs/tags/v')) {
             $llvm_version = $Env:GITHUB_REF.Substring('refs/tags/v'.Length)
