@@ -62,6 +62,34 @@ jobs:
         files: |
           /Users/aadams80/Documents/llvm/llvm_*.tar.xz
 
+  macos_x86:
+    runs-on: macos-13
+
+    steps:
+    - name: Clone Qwerty repo
+      uses: actions/checkout@v4
+      with:
+        repository: gt-tinker/qwerty
+        ref: main
+    - name: Build LLVM
+      working-directory: dev/ci
+      run: |
+        export LLVM_VERSION=${GITHUB_REF#refs/tags/v}
+        if [[ ! ( $LLVM_VERSION =~ [[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+ ) ]]; then
+          printf '$GITHUB_REF is not an LLVM version: %s\n' "$GITHUB_REF" >&2
+          exit 1
+        fi
+
+        ./build-llvm.sh "$LLVM_VERSION"
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        # If the glob below doesn't match anything, don't silently fail
+        fail_on_unmatched_files: true
+        files: |
+          llvm_*.tar.xz
+
   windows_x86:
     runs-on: windows-2022
 
