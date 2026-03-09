@@ -63,7 +63,7 @@ jobs:
           /Users/aadams80/Documents/llvm/llvm_*.tar.xz
 
   macos_x86:
-    runs-on: macos-13
+    runs-on: macos-15-intel
 
     steps:
     - name: Clone Qwerty repo
