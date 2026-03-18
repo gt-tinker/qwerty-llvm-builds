@@ -10,7 +10,7 @@ jobs:
 
     steps:
     - name: Clone Qwerty repo
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: gt-tinker/qwerty
         ref: main
@@ -25,7 +25,7 @@ jobs:
 
         sbatch slurm-build-manylinux-llvm.sh
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
         # If the glob below doesn't match anything, don't silently fail
@@ -38,7 +38,7 @@ jobs:
 
     steps:
     - name: Clone Qwerty repo
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: gt-tinker/qwerty
         ref: main
@@ -54,7 +54,7 @@ jobs:
         rm -vf /Users/aadams80/Documents/llvm/llvm_*.tar.xz
         ./build-llvm.sh "$LLVM_VERSION" /Users/aadams80/Documents/llvm
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
         # If the glob below doesn't match anything, don't silently fail
@@ -67,7 +67,7 @@ jobs:
 
     steps:
     - name: Clone Qwerty repo
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: gt-tinker/qwerty
         ref: main
@@ -82,7 +82,7 @@ jobs:
 
         ./build-llvm.sh "$LLVM_VERSION"
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
         # If the glob below doesn't match anything, don't silently fail
@@ -95,7 +95,7 @@ jobs:
 
     steps:
     - name: Clone Qwerty repo
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         repository: gt-tinker/qwerty
         ref: main
@@ -115,7 +115,7 @@ jobs:
 
         .\build-llvm.ps1 -version $llvm_version
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/')
       with:
         # If the glob below doesn't match anything, don't silently fail
